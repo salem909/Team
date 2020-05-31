@@ -212,6 +212,7 @@ public class CommandsExecutor {
         addCommand("bosshp", BossHpCommand.class);
         addCommand("mobhp", MobHpCommand.class);
         addCommand("occupation", Occupation.class);
+        addCommand("rebirth", RebornCommand.class;        
         
         commandsNameDesc.add(levelCommandsCursor);
     }
