@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `jailexpire` bigint(20) NOT NULL DEFAULT '0',
   `occupation` int(11) unsigned NOT NULL DEFAULT '0';
   `occupationexp` int(11) unsigned NOT NULL DEFAULT '0';
-  `occupationlevel` int(11) unsigned NOT NULL DEFAULT '0';
+  `occupationlevel` int(11) unsigned NOT NULL DEFAULT '1';
   PRIMARY KEY (`id`),
   KEY `accountid` (`accountid`),
   KEY `party` (`party`),
