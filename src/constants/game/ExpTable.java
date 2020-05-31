@@ -26,13 +26,23 @@ public final class ExpTable {
     private static final int[] equip = {1, 15, 19, 23, 35, 43, 98, 188, 237, 280, 304, 331, 571, 656, 840, 1060, 1193, 1467, 1784, 1976, 2357, 2791, 3052, 3560, 4128, 4469, 5123, 5844, 6276, 7093, 10000};
     private static final int[] pet = {1, 1, 3, 6, 14, 31, 60, 108, 181, 287, 434, 632, 891, 1224, 1642, 2161, 2793, 3557, 4467, 5542, 6801, 8263, 9950, 11882, 14084, 16578, 19391, 22547, 26074, 30000, 2147483647};
     private static final int[] mount = {1, 24, 50, 105, 134, 196, 254, 263, 315, 367, 430, 543, 587, 679, 725, 897, 1146, 1394, 1701, 2247, 2543, 2898, 3156, 3313, 3584, 3923, 4150, 4305, 4550};
-
+    private static final int[] occupation = {1, 8, 16, 33, 41, 56, 70, 138, 158, 179, 219, 243, 274, 292, 310};
+    private static final int[] fishing = {1, 60, 90, 130, 180, 240, 310, 390, 480, 580, 690, 710, 840, 980, 1130, 1337, 1567, 1817, 2086, 2376, 2700};
+    
+    
     public static int getExpNeededForLevel(int level) {
         return level > 200 ? 2000000000 : exp[level];
     }
 
     public static int getClosenessNeededForLevel(int level) {
         return pet[level];
+    }
+    
+    public static final int getOccupationNeededForLevel(int level) {
+        return occupation[level];
+    }
+    public static final int getFishingNeededForLevel(int level) {
+        return fishing[level];
     }
 
     public static int getMountExpNeededForLevel(int level) {
