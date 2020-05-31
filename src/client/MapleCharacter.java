@@ -22,109 +22,8 @@
  */
 package client;
 
-import java.awt.Point;
-import java.lang.ref.WeakReference;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
-import java.util.Comparator;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
-
-import config.YamlConfig;
-import net.server.PlayerBuffValueHolder;
-import net.server.PlayerCoolDownValueHolder;
-import net.server.Server;
-import net.server.audit.locks.MonitoredLockType;
-import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
-import net.server.coordinator.world.MapleInviteCoordinator;
-import net.server.guild.MapleAlliance;
-import net.server.guild.MapleGuild;
-import net.server.guild.MapleGuildCharacter;
-import net.server.world.MapleMessenger;
-import net.server.world.MapleMessengerCharacter;
-import net.server.world.MapleParty;
-import net.server.world.MaplePartyCharacter;
-import net.server.world.PartyOperation;
-import net.server.world.World;
-import scripting.AbstractPlayerInteraction;
-import scripting.event.EventInstanceManager;
-import scripting.item.ItemScriptManager;
-import server.CashShop;
-import server.MapleItemInformationProvider;
-import server.MapleItemInformationProvider.ScriptedItem;
-import server.MapleMarriage;
-import server.MapleShop;
-import server.MapleStatEffect;
-import server.MapleStorage;
-import server.MapleTrade;
-import server.TimerManager;
-import server.ThreadManager;
-import server.events.MapleEvents;
-import server.events.RescueGaga;
-import server.events.gm.MapleFitness;
-import server.events.gm.MapleOla;
-import server.life.MapleMonster;
-import server.life.MaplePlayerNPC;
-import server.life.MobSkill;
-import server.life.MobSkillFactory;
-import server.maps.FieldLimit;
-import server.maps.MapleHiredMerchant;
-import server.maps.MapleDoor;
-import server.maps.MapleDoorObject;
-import server.maps.MapleDragon;
-import server.maps.MapleMap;
-import server.maps.MapleMapEffect;
-import server.maps.MapleMapManager;
-import server.maps.MapleMapItem;
-import server.maps.MapleMapObject;
-import server.maps.MapleMapObjectType;
-import server.maps.MapleMiniGame;
-import server.maps.MapleMiniGame.MiniGameResult;
-import server.maps.MaplePlayerShop;
-import server.maps.MaplePlayerShopItem;
-import server.maps.MaplePortal;
-import server.maps.MapleSummon;
-import server.maps.SavedLocation;
-import server.maps.SavedLocationType;
-import server.minigame.MapleRockPaperScissor;
-import server.partyquest.AriantColiseum;
-import server.partyquest.MonsterCarnival;
-import server.partyquest.MonsterCarnivalParty;
-import server.partyquest.PartyQuest;
-import server.quest.MapleQuest;
-import tools.DatabaseConnection;
-import tools.FilePrinter;
-import tools.MaplePacketCreator;
-import tools.Pair;
-import tools.Randomizer;
-import tools.exceptions.NotEnabledException;
-import tools.packets.Wedding;
 import client.autoban.AutobanManager;
 import client.creator.CharacterFactoryRecipe;
-import client.keybind.MapleKeyBinding;
-import client.keybind.MapleQuickslotBinding;
 import client.inventory.Equip;
 import client.inventory.Equip.StatUpgrade;
 import client.inventory.Item;
@@ -138,9 +37,14 @@ import client.inventory.ModifyInventory;
 import client.inventory.PetDataFactory;
 import client.inventory.manipulator.MapleCashidGenerator;
 import client.inventory.manipulator.MapleInventoryManipulator;
+import client.keybind.MapleKeyBinding;
+import client.keybind.MapleQuickslotBinding;
 import client.newyear.NewYearCardRecord;
-import client.processor.npc.FredrickProcessor;
 import client.processor.action.PetAutopotProcessor;
+import client.processor.npc.FredrickProcessor;
+import config.ServerConfig;
+import config.WorldConfig;
+import config.YamlConfig;
 import constants.game.ExpTable;
 import constants.game.GameConstants;
 import constants.inventory.ItemConstants;
@@ -171,14 +75,111 @@ import constants.skills.Priest;
 import constants.skills.Ranger;
 import constants.skills.Shadower;
 import constants.skills.Sniper;
-import constants.skills.Warrior;
 import constants.skills.ThunderBreaker;
-import net.server.services.type.ChannelServices;
+import constants.skills.Warrior;
+import java.awt.Point;
+import java.lang.ref.WeakReference;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Stack;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.regex.Pattern;
+import net.server.PlayerBuffValueHolder;
+import net.server.PlayerCoolDownValueHolder;
+import net.server.Server;
+import net.server.audit.locks.MonitoredLockType;
+import net.server.audit.locks.factory.MonitoredReentrantLockFactory;
+import net.server.coordinator.world.MapleInviteCoordinator;
+import net.server.guild.MapleAlliance;
+import net.server.guild.MapleGuild;
+import net.server.guild.MapleGuildCharacter;
 import net.server.services.task.channel.FaceExpressionService;
 import net.server.services.task.world.CharacterSaveService;
+import net.server.services.type.ChannelServices;
 import net.server.services.type.WorldServices;
+import net.server.world.MapleMessenger;
+import net.server.world.MapleMessengerCharacter;
+import net.server.world.MapleParty;
+import net.server.world.MaplePartyCharacter;
+import net.server.world.PartyOperation;
+import net.server.world.World;
 import org.apache.mina.util.ConcurrentHashSet;
+import scripting.AbstractPlayerInteraction;
+import scripting.event.EventInstanceManager;
+import scripting.item.ItemScriptManager;
+import server.CashShop;
+import server.MapleItemInformationProvider;
+import server.MapleItemInformationProvider.ScriptedItem;
+import server.MapleMarriage;
+import server.MapleShop;
+import server.MapleStatEffect;
+import server.MapleStorage;
+import server.MapleTrade;
+import server.ThreadManager;
+import server.TimerManager;
+import server.events.MapleEvents;
+import server.events.RescueGaga;
+import server.events.gm.MapleFitness;
+import server.events.gm.MapleOla;
+import server.life.MapleMonster;
+import server.life.MaplePlayerNPC;
+import server.life.MobSkill;
+import server.life.MobSkillFactory;
+import server.maps.FieldLimit;
+import server.maps.MapleDoor;
+import server.maps.MapleDoorObject;
+import server.maps.MapleDragon;
+import server.maps.MapleHiredMerchant;
+import server.maps.MapleMap;
+import server.maps.MapleMapEffect;
+import server.maps.MapleMapItem;
+import server.maps.MapleMapManager;
+import server.maps.MapleMapObject;
+import server.maps.MapleMapObjectType;
+import server.maps.MapleMiniGame;
+import server.maps.MapleMiniGame.MiniGameResult;
+import server.maps.MaplePlayerShop;
+import server.maps.MaplePlayerShopItem;
+import server.maps.MaplePortal;
+import server.maps.MapleSummon;
+import server.maps.SavedLocation;
+import server.maps.SavedLocationType;
+import server.minigame.MapleRockPaperScissor;
+import server.partyquest.AriantColiseum;
+import server.partyquest.MonsterCarnival;
+import server.partyquest.MonsterCarnivalParty;
+import server.partyquest.PartyQuest;
+import server.quest.MapleQuest;
+import tools.DatabaseConnection;
+import tools.FilePrinter;
 import tools.LongTool;
+import tools.MaplePacketCreator;
+import tools.Pair;
+import tools.Randomizer;
+import tools.exceptions.NotEnabledException;
+import tools.packets.Wedding;
 
 public class MapleCharacter extends AbstractMapleCharacterObject {
     private static final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
@@ -344,6 +345,9 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
     private long lastExpGainTime;
     private boolean pendingNameChange; //only used to change name on logout, not to be relied upon elsewhere
     private long loginTime;
+    private MapleOccupations occupation = MapleOccupations.Atheist;
+    public int OccupationLevel;
+    public int OccupationExp;
     
     private MapleCharacter() {
         super.setListener(new AbstractCharacterListener() {
@@ -460,6 +464,9 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         ret.accountid = c.getAccID();
         ret.buddylist = new BuddyList(20);
         ret.maplemount = null;
+        ret.occupation = MapleOccupations.Atheist;
+        ret.OccupationExp = 0;
+        ret.OccupationLevel = 1;
         ret.getInventory(MapleInventoryType.EQUIP).setSlotLimit(24);
         ret.getInventory(MapleInventoryType.USE).setSlotLimit(24);
         ret.getInventory(MapleInventoryType.SETUP).setSlotLimit(24);
@@ -842,6 +849,48 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             }
         }
         return maxbasedamage;
+    }
+    
+    public void changeOccupation(MapleOccupations newoccupation) {
+        this.occupation = newoccupation;
+    }
+
+    public void Setoccupation(int occ) {
+        changeOccupation(MapleOccupations.getById(occ));
+    }
+
+    public MapleOccupations getOccupation() {
+        return occupation;
+    }
+
+    public int[] getOccupationRates() { 
+        int exprate,droprate,mesorate;
+        if (getOccupation().isA(MapleOccupations.Ziva)) {
+            exprate = config.ServerConfig.EXP_RATE;
+            mesorate = config.ServerConfig.MESO_RATE;
+            droprate = config.ServerConfig.DROP_RATE;
+        } else if (getOccupation().isA(MapleOccupations.Hades)) {
+            exprate = config.ServerConfig.EXP_RATE;
+            mesorate = config.ServerConfig.MESO_RATE;
+            droprate = config.ServerConfig.DROP_RATE;
+                    } else if (getOccupation().isA(MapleOccupations.Ares)) {
+            exprate = config.ServerConfig.EXP_RATE;
+            mesorate = config.ServerConfig.MESO_RATE;
+            droprate = config.ServerConfig.DROP_RATE;
+                    } else if (getOccupation().isA(MapleOccupations.Aphrodite)) {
+            exprate = config.ServerConfig.EXP_RATE;
+            mesorate = config.ServerConfig.MESO_RATE;
+            droprate = config.ServerConfig.DROP_RATE;
+        } else if (getOccupation().isA(MapleOccupations.NOJOB)) {
+            exprate = config.ServerConfig.EXP_RATE;
+            mesorate = config.ServerConfig.MESO_RATE;
+            droprate = config.ServerConfig.DROP_RATE;
+        } else {
+            exprate = config.ServerConfig.EXP_RATE;
+            mesorate = config.ServerConfig.MESO_RATE;
+            droprate = config.ServerConfig.DROP_RATE;
+        }
+        return new int[]{exprate, droprate, mesorate};
     }
     
     public int calculateMaxBaseMagicDamage(int matk) {
@@ -4982,6 +5031,37 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             chrLock.unlock();
         }
     }
+    
+    public void gainOccupationEXP(int amount){
+        int totoexp = this.OccupationExp + amount;
+        if(totoexp >= ExpTable.getOccupationNeededForLevel(OccupationLevel) && this.getOccupationLevel() < 150){
+            OccupationLevelUp();
+        }
+        else {
+            OccupationExp += amount;
+                    getClient().getSession().write(MaplePacketCreator.showSpecialEffect(9));
+                    getClient().getSession().write(MaplePacketCreator.serverNotice(5, "You have gain " + amount + " Occupation EXP! This is your Occupation EXP Table : " + this.getOccupationEXP() + " / " + this.getExpNeededForOccupationLevel(this.getOccupationLevel()) +" "));
+}
+
+    }
+    
+    public int getExpNeededForOccupationLevel(int level) {
+        return ExpTable.getOccupationNeededForLevel(level);
+    }
+    
+    public void OccupationLevelUp(){
+        getMap().broadcastMessage(getClient().getPlayer(), MaplePacketCreator.showSpecialEffect(8), false);
+        getClient().getSession().write(MaplePacketCreator.showSpecialEffect(0));
+        this.OccupationLevel += 1;
+        this.OccupationExp = 0;
+        this.remainingAp += 250;
+        this.updateSingleStat(MapleStat.MAXHP, maxhp);
+        this.updateSingleStat(MapleStat.MAXMP, maxmp);
+        this.updateSingleStat(MapleStat.AVAILABLEAP, remainingAp);
+        getClient().getSession().write(MaplePacketCreator.serverNotice(5, "Congrats! Your Occupation Level has leveled up! You are now a Lv." + this.getOccupationLevel() + " Sir!"));
+        getClient().getSession().write(MaplePacketCreator.serverNotice(1, "You are now a Lv." + this.getOccupationLevel() + " Sir!"));
+
+    }
 
     public int getExp() {
         return exp.get();
@@ -5235,6 +5315,17 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
 
     public int getInitialSpawnpoint() {
         return initialSpawnPoint;
+    }
+    
+    public int getOccupationEXP(){
+        return this.OccupationExp;
+
+    }
+    public void setOcupationLevel(int x){
+        this.OccupationLevel = x;
+    }
+    public int getOccupationLevel(){
+        return this.OccupationLevel;
     }
 
     public MapleInventory getInventory(MapleInventoryType type) {
@@ -7017,6 +7108,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             ret.rankMove = rs.getInt("rankMove");
             ret.jobRank = rs.getInt("jobRank");
             ret.jobRankMove = rs.getInt("jobRankMove");
+            ret.OccupationExp = rs.getInt("occupationexp");
+            ret.OccupationLevel = rs.getInt("occupationlevel");
             
             if(equipped != null) {  // players can have no equipped items at all, ofc
                 MapleInventory inv = ret.inventory[MapleInventoryType.EQUIPPED.ordinal()];
@@ -7070,6 +7163,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
         ret.rankMove = this.getRankMove();
         ret.jobRank = this.getJobRank();
         ret.jobRankMove = this.getJobRankMove();
+        ret.OccupationExp = 0;
+        ret.OccupationLevel = 1;
         
         return ret;
     }
@@ -7169,6 +7264,9 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             ret.buddylist = new BuddyList(buddyCapacity);
             ret.lastExpGainTime = rs.getTimestamp("lastExpGainTime").getTime();
             ret.canRecvPartySearchInvite = rs.getBoolean("partySearch");
+            ret.occupation = MapleOccupations.getById(rs.getInt("occupation"));
+            ret.OccupationExp = rs.getInt("occupationexp");
+            ret.OccupationLevel = rs.getInt("occupationlevel");
             
             ret.getInventory(MapleInventoryType.EQUIP).setSlotLimit(rs.getByte("equipslots"));
             ret.getInventory(MapleInventoryType.USE).setSlotLimit(rs.getByte("useslots"));
@@ -8469,7 +8567,12 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
             con.setAutoCommit(false);
             PreparedStatement ps;
-            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, gachaexp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, map = ?, meso = ?, hpMpUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, mountlevel = ?, mountexp = ?, mounttiredness= ?, equipslots = ?, useslots = ?, setupslots = ?, etcslots = ?,  monsterbookcover = ?, vanquisherStage = ?, dojoPoints = ?, lastDojoStage = ?, finishedDojoTutorial = ?, vanquisherKills = ?, matchcardwins = ?, matchcardlosses = ?, matchcardties = ?, omokwins = ?, omoklosses = ?, omokties = ?, dataString = ?, fquest = ?, jailexpire = ?, partnerId = ?, marriageItemId = ?, lastExpGainTime = ?, ariantPoints = ?, partySearch = ? WHERE id = ?", Statement.RETURN_GENERATED_KEYS);
+            //if (notAutosave) {
+            //    ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, gachaexp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, map = ?, meso = ?, hpMpUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, mountlevel = ?, mountexp = ?, mounttiredness= ?, equipslots = ?, useslots = ?, setupslots = ?, etcslots = ?,  monsterbookcover = ?, vanquisherStage = ?, dojoPoints = ?, lastDojoStage = ?, finishedDojoTutorial = ?, vanquisherKills = ?, matchcardwins = ?, matchcardlosses = ?, matchcardties = ?, omokwins = ?, omoklosses = ?, omokties = ?, dataString = ?, fquest = ?, jailexpire = ?, partnerId = ?, marriageItemId = ?, lastExpGainTime = ?, ariantPoints = ?, partySearch = ?, occupation = ?, occupationexp = ?, occupationlevel = ? WHERE id = ?", Statement.RETURN_GENERATED_KEYS);            
+            //} else {
+            //    ps = con.prepareStatement("INSERT INTO characters (level, fame, str, dex, luk, `int, exp, gachaexp, hp, mp, maxhp, maxmp, sp, ap, gm, skincolor, gender, job, hair, face, map, meso, hpMpUsed, spawnpoint, party, buddyCapacity, messengerid, messengerposition, mountlevel, mountexp, mounttiredness, equipslots, useslots, setupslots, etcslots,  monsterbookcover, vanquisherStage, dojoPoints, lastDojoStage, finishedDojoTutorial, vanquisherKills, matchcardwins, matchcardlosses, matchcardties, omokwins, omoklosses, omokties, dataString, fquest, jailexpire, partnerId, marriageItemId, lastExpGainTime, ariantPoints, partySearch, occupation, occupationexp, occupationlevel) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            //}
+            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, gachaexp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, map = ?, meso = ?, hpMpUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, mountlevel = ?, mountexp = ?, mounttiredness= ?, equipslots = ?, useslots = ?, setupslots = ?, etcslots = ?,  monsterbookcover = ?, vanquisherStage = ?, dojoPoints = ?, lastDojoStage = ?, finishedDojoTutorial = ?, vanquisherKills = ?, matchcardwins = ?, matchcardlosses = ?, matchcardties = ?, omokwins = ?, omoklosses = ?, omokties = ?, dataString = ?, fquest = ?, jailexpire = ?, partnerId = ?, marriageItemId = ?, lastExpGainTime = ?, ariantPoints = ?, partySearch = ?, occupation = ?, occupationexp = ?, occupationlevel = ? WHERE id = ?", Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, level);    // thanks CanIGetaPR for noticing an unnecessary "level" limitation when persisting DB data
             ps.setInt(2, fame);
             
@@ -8545,6 +8648,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             } else {
                 ps.setInt(27, 0);
                 ps.setInt(28, 4);
+                ps.setInt(57, OccupationExp);
+                ps.setInt(58, OccupationLevel);
             }
             if (maplemount != null) {
                 ps.setInt(29, maplemount.getLevel());
@@ -8581,7 +8686,8 @@ public class MapleCharacter extends AbstractMapleCharacterObject {
             ps.setTimestamp(53, new Timestamp(lastExpGainTime));
             ps.setInt(54, ariantPoints);
             ps.setBoolean(55, canRecvPartySearchInvite);
-            ps.setInt(56, id);
+            ps.setInt(56, occupation.getId());
+            ps.setInt(59, id);
 
             int updateRows = ps.executeUpdate();
             ps.close();
