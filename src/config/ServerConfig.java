@@ -125,6 +125,11 @@ public class ServerConfig {
     public boolean USE_CLEAR_OUTDATED_COUPONS;
     public boolean ALLOW_CASHSHOP_NAME_CHANGE;
     public boolean ALLOW_CASHSHOP_WORLD_TRANSFER;//Allows players to buy world transfers in the cash shop.
+    
+    //Occupations
+    public static int EXP_RATE = 750;
+    public static int MESO_RATE = 2500;
+    public static final byte DROP_RATE = 3;
 
     //Maker Configuration
     public boolean USE_MAKER_PERMISSIVE_ATKUP;
