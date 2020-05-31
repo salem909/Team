@@ -88,6 +88,10 @@ public class TimerManager implements TimerManagerMBean {
         };
     }
     
+    public void purgeTM() {
+        ses.purge();
+    }
+    
     public ScheduledFuture<?> register(Runnable r, long repeatTime, long delay) {
         return ses.scheduleAtFixedRate(new LoggingSaveRunnable(r), delay, repeatTime, TimeUnit.MILLISECONDS);
     }
