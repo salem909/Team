@@ -154,6 +154,7 @@ public final class Channel {
             	expedType.add(exped);
             }
             
+            
             if (Server.getInstance().isOnline()) {  // postpone event loading to improve boot time... thanks Riizade, daronhudson for noticing slow startup times
                 eventSM = new EventScriptManager(this, getEvents());
                 eventSM.init();
@@ -161,6 +162,28 @@ public final class Channel {
                 String[] ev = {"0_EXAMPLE"};
                 eventSM = new EventScriptManager(this, ev);
             }
+            
+                
+            TimerManager tMan = TimerManager.getInstance();
+            tMan.start();
+            //tMan.register(new respawnMaps(), 10000);
+            tMan.register(new Runnable() {
+
+@Override
+                public void run() {
+                    for(MapleCharacter chr : getPlayerStorage().getAllCharacters()){
+                    if(chr.getMapId() == 180000000){
+                        server.Occexp.doOccexpgain(chr);
+                    }
+                }
+                    TimerManager.getInstance().purgeTM();
+
+            }
+
+            }, 30000);
+
+            
+            
             
             dojoStage = new int[20];
             dojoFinishTime = new long[20];
@@ -177,6 +200,8 @@ public final class Channel {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        
     }
     
     public synchronized void reloadEventScriptManager(){
@@ -320,6 +345,7 @@ public final class Channel {
     public void broadcastPacket(final byte[] data) {
         for (MapleCharacter chr : players.getAllCharacters()) {
             chr.announce(data);
+            
         }
     }
     
